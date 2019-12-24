@@ -107,7 +107,7 @@ if ($requestedtable) {
             }
         }
 
-        echo '<ul>';
+        echo '</ul>';
     }
 }
 
