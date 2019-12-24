@@ -41,7 +41,6 @@ $longparams = [
     'backupdir' => 'C:\\inetpub\\wwwroot\\bbbackup\\',  // Local dir to download files into.
     'webpath'   => '/bbbackup/',                  // Equivalent dir in web view.
     'cookie'    => true,                          // Path to cookie. If not provided, uses MoodleDir/cookie.txt.
-    'limit'     => '100',                         // Number of records to process in one run, default is 100, use 0 for no limit.
     'log'       => 'log.csv',                     // CSV log file.
     'help'      => false,                         // Show CLI options.
 ];
@@ -54,8 +53,7 @@ $shortmappings = [
     'b' => 'backupdir',
     'w' => 'webpath',
     'c' => 'cookie',
-    'l' => 'limit',
-    'g' => 'log',
+    'l' => 'log',
     'h' => 'help',
 ];
 
@@ -79,8 +77,7 @@ Options:
 -b, --backupdir (optional) Local dir to download files into.
 -w, --webpath   (optional) Equivalent dir in web view.
 -c, --cookie    (optional) Path to cookie. If not provided, uses MoodleDir/cookie.txt.
--l, --limit     (optional) Number of records to process in one run, default is 100, use 0 for no limit.
--g, --log       (optional) CSV log file to append to.
+-l, --log       (optional) CSV log file to append to.
 -h, --help      (optional) Print out this help
 
 Example:
@@ -148,14 +145,12 @@ $matchtypes = ['image'=>'src', 'file'=>'href'];
 $from = '{' . $table . '}';
 $params = ['match' => '%'.$matchtext.'%', 'module' => $table];
 $likewhere = $DB->sql_like('t.'.$field, ':match', false);
-$limit = $options['limit']==0 ? '' : 'LIMIT '.$options['limit'];
 $sql = "SELECT cm.id as cmid, t.id, t.name, t.$field as text
         FROM $from t, {modules} m, {course_modules} cm
         WHERE $likewhere
           AND m.name = :module
           AND cm.module = m.id
-          AND cm.instance = t.id
-        $limit";
+          AND cm.instance = t.id";
 $results = $DB->get_records_sql($sql, $params);
 
 // Capture results in this...
