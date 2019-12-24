@@ -218,9 +218,10 @@ function savefile($url, $curl, $storepath) {
     $lastdot = strpos($filename, '.');
 
     $headers = $curl->head($url);
-    if (!$headers || $curl->errno != 200 || $curl->response['Content-Length'] == 0) {
+    if (!$headers || $curl->response['Content-Length'] == 0) {
         return false;
     }
+    $curl->resetopt();
 
     if (!$lastdot) {
         $mimetype = $curl->response['Content-Type'];
@@ -229,7 +230,7 @@ function savefile($url, $curl, $storepath) {
     }
 
     if (!file_exists($storepath.$filename)) {
-        $file = $curl->get($url);
+        $file = $curl->get($url, [], []);
         file_safe_save_content($file, $storepath.$filename);
     }
     return $filename;
