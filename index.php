@@ -54,6 +54,7 @@ $selectoptions = [
 // Get form data, if set.
 $requestedtable = optional_param('table', '', PARAM_TEXT);
 $matchtext = optional_param('match', '', PARAM_TEXT);
+$excludetext = optional_param('exclude', '', PARAM_TEXT);
 
 // Print the settings form.
 echo $OUTPUT->box_start('generalbox boxwidthwide boxaligncenter centerpara');
@@ -62,7 +63,10 @@ echo '<label for="table"> ' . get_string('table', 'report_embedded') . '</label>
 echo html_writer::select($selectoptions, 'table', $requestedtable);
 echo ' ';
 echo '<label for="match"> ' . get_string('match', 'report_embedded') . '</label> ';
-echo '<input type="text" name="match" class="form-control" style="display:inline;width:300px;" value="' . $matchtext . '" />';
+echo '<input type="text" name="match" class="form-control" style="display:inline;width:200px;" value="' . $matchtext . '" />';
+echo ' ';
+echo '<label for="exclude"> ' . get_string('exclude', 'report_embedded') . '</label> ';
+echo '<input type="text" name="exclude" class="form-control" style="display:inline;width:200px;" value="' . $excludetext . '" />';
 echo ' ';
 echo '<input type="submit" class="btn btn-secondary" id="settingssubmit" value="' .
      get_string('getreport', 'report_embedded') . '" />';
@@ -76,8 +80,10 @@ if ($requestedtable) {
     $table = substr($requestedtable, 0, $divider);
     $field = substr($requestedtable, $divider+1);
     $matchtypes = ['image'=>'src', 'file'=>'href'];
-
-    // echo $table . ' ' . $field;
+    $exceptions = false;
+    if($excludetext) {
+        $exceptions = explode(',', $excludetext);
+    }
 
     $from = '{' . $table . '}';
     $params = ['match' => '%'.$matchtext.'%', 'module' => $table];
@@ -101,7 +107,7 @@ if ($requestedtable) {
         foreach ($matchtypes as $type => $attribute) {
             preg_match_all('/'.$attribute.'="([^\s"]+)"/', $htmlobject->text, $match);
             foreach ($match[1] as $index => $url) {
-                if (strpos($url, $matchtext) !== false) {
+                if (strpos($url, $matchtext) !== false && !($exceptions && containsstring($url, $exceptions))) {
                     echo "<li>$type: <a href=\"$url\">$url</a></li>";
                 }
             }
@@ -113,3 +119,13 @@ if ($requestedtable) {
 
 // Footer.
 echo $OUTPUT->footer();
+
+//----------------------------------------------------------------------------------------------------------------------------------
+function containsstring($haystack, $needles) {
+    foreach ($needles as $needle) {
+        if(strpos($haystack, $needle) !== false) {
+            return true;
+        }
+    }
+    return false;
+}

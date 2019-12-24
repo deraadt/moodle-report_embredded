@@ -24,6 +24,7 @@
  */
 
 $string['embedded:view'] = 'View embedded links in content areas';
+$string['exclude'] = 'Exclude (comma separated list)';
 $string['getreport'] = 'Get the report';
 $string['match'] = 'Match';
 $string['pluginname'] = 'Embedded links';
