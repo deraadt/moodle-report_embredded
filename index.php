@@ -88,7 +88,27 @@ if ($requestedtable) {
     $from = '{' . $table . '}';
     $params = ['match' => '%'.$matchtext.'%', 'module' => $table];
     $likewhere = $DB->sql_like('t.'.$field, ':match', false);
-    $sql = "SELECT cm.id as cmid, t.id, t.name, t.$field as text
+    $name = 't.name';
+    $nolink = false;
+    switch ($table) {
+        case 'book_chapters':
+            $name = 't.title';
+            $nolink = true;
+            break;
+        case 'course':
+            $name = 't.shortname';
+            $nolink = true;
+            break;
+        case 'question';
+            $nolink = true;
+            break;
+        case 'wiki_pages':
+            $name = 't.title';
+            $nolink = true;
+            break;
+
+    }
+    $sql = "SELECT cm.id as cmid, t.id, $name, t.$field as text
             FROM $from t, {modules} m, {course_modules} cm
             WHERE $likewhere
               AND m.name = :module
@@ -101,7 +121,15 @@ if ($requestedtable) {
         $moduleswithlinks[$cmid]['name'] = $htmlobject->name;
         $replacements = [];
 
-        echo '<p><a href="'.$CFG->wwwroot.'/mod/'.$table.'/view.php?id='.$cmid.'">'.$htmlobject->name.'</a></p>';
+        echo '<p>';
+        if (!$nolink) {
+            echo '<a href="'.$CFG->wwwroot.'/mod/'.$table.'/view.php?id='.$cmid.'">';
+        }
+        echo $htmlobject->name;
+        if (!$nolink) {
+            echo '</a>';
+        }
+        echo '</p>';
         echo '<ul>';
 
         foreach ($matchtypes as $type => $attribute) {
