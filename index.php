@@ -87,8 +87,7 @@ if ($requestedtable) {
             WHERE $likewhere
               AND m.name = :module
               AND cm.module = m.id
-              AND cm.instance = t.id
-            LIMIT 100";
+              AND cm.instance = t.id";
     $results = $DB->get_records_sql($sql, $params);
 
     foreach ($results as $cmid => $htmlobject) {
@@ -96,7 +95,7 @@ if ($requestedtable) {
         $moduleswithlinks[$cmid]['name'] = $htmlobject->name;
         $replacements = [];
 
-        echo '<p>'.$htmlobject->name.'</p>';
+        echo '<p><a href="'.$CFG->wwwroot.'/mod/'.$table.'/view.php?id='.$cmid.'">'.$htmlobject->name.'</a></p>';
         echo '<ul>';
 
         foreach ($matchtypes as $type => $attribute) {
