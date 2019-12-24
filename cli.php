@@ -225,7 +225,7 @@ function savefile($url, $curl, $storepath) {
     }
 
     if (!file_exists($storepath.$filename)) {
-        $file = $curl->get($url, [], []);
+        $file = $curl->get($url, [], ['CURLOPT_TIMEOUT'=>300]);
         file_safe_save_content($file, $storepath.$filename);
     }
     return $filename;
