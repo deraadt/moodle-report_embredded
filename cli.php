@@ -25,6 +25,9 @@
 
 define('CLI_SCRIPT', true);
 
+ini_set('memory_limit','1024M');
+define('MAX_FILE', 1048576000); // 1000*1024*1024
+
 require(__DIR__.'/../../config.php');
 require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -171,10 +174,11 @@ foreach ($results as $cmid => $htmlobject) {
         foreach ($match[1] as $index => $url) {
             if (!array_key_exists($url, $moduleswithlinks[$cmid]['replacements'])  &&
                 strpos($url, $matchtext) !== false && !($exceptions && containsstring($url, $exceptions))) {
-                if ($filename = savefile($url, $curl, $backuppath)) {
+                $filename = savefile($url, $curl, $backuppath);
+                if ($filename != false) {
                     $moduleswithlinks[$cmid]['replacements'][$url] = ['type'=>$type, 'path'=>$webpath.$filename];
+                    echo '.';
                 }
-                echo '.';
             }
         }
     }
@@ -185,17 +189,14 @@ foreach ($results as $cmid => $htmlobject) {
         $htmlobject->text = str_replace($old, $newdetails['path'], $htmlobject->text);
     }
     $DB->set_field($table, $field, $htmlobject->text, ['id' => $htmlobject->id]);
-}
 
-// Output results.
-$handle = fopen($options['log'], 'a+');
-foreach ($moduleswithlinks as $cmid => $details) {
-    foreach ($details['replacements'] as $url => $newdetails) {
-        fwrite($handle, "$cmid,$table,$field,".$details['id'].",".$newdetails['type'].",".$url.",".$newdetails['path']."\n");
+    // Output results.
+    $handle = fopen($options['log'], 'a+');
+    foreach ($moduleswithlinks[$cmid]['replacements'] as $url => $newdetails) {
+        fwrite($handle, "$cmid,$table,$field,".$moduleswithlinks[$cmid]['id'].",".$newdetails['type'].",".$url.",".$newdetails['path']."\n");
     }
+    fclose($handle);
 }
-fclose($handle);
-
 
 //----------------------------------------------------------------------------------------------------------------------------------
 function mime2ext($mime){
@@ -213,9 +214,10 @@ function savefile($url, $curl, $storepath) {
     $lastdot = strpos($filename, '.');
 
     $headers = $curl->head($url);
-    if (!$headers || $curl->response['Content-Length'] == 0) {
+    if (!$headers || $curl->response['Content-Length'] == 0 || $curl->response['Content-Length'] > MAX_FILE) {
         return false;
     }
+
     $curl->resetopt();
 
     if (!$lastdot) {
