@@ -183,6 +183,9 @@ switch ($table) {
 }
 
 $results = $DB->get_records_sql($sql, $params);
+if(!results) {
+    echo "Error running...\n$sql\n";
+}
 
 // Capture results in this...
 $moduleswithlinks = [];
