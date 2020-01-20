@@ -92,28 +92,38 @@ if ($requestedtable) {
     $nolink = false;
     switch ($table) {
         case 'book_chapters':
-            $name = 't.title';
+            $sql = "SELECT t.id, t.title as name, t.$field as text
+                    FROM $from t
+                    WHERE $likewhere";
             $nolink = true;
             break;
         case 'course':
-            $name = 't.shortname';
+            $sql = "SELECT t.id, t.shortname as name, t.$field as text
+                    FROM $from t
+                    WHERE $likewhere";
             $nolink = true;
             break;
         case 'question';
+            $sql = "SELECT t.id, t.name, t.$field as text
+                    FROM $from t
+                    WHERE $likewhere";
             $nolink = true;
             break;
         case 'wiki_pages':
-            $name = 't.title';
+            $sql = "SELECT t.id, t.title as name, t.$field as text
+                    FROM $from t
+                    WHERE $likewhere";
             $nolink = true;
             break;
-
+        default:
+            $sql = "SELECT cm.id as cmid, t.id, $name, t.$field as text
+                    FROM $from t, {modules} m, {course_modules} cm
+                    WHERE $likewhere
+                      AND m.name = :module
+                      AND cm.module = m.id
+                      AND cm.instance = t.id";
     }
-    $sql = "SELECT cm.id as cmid, t.id, $name, t.$field as text
-            FROM $from t, {modules} m, {course_modules} cm
-            WHERE $likewhere
-              AND m.name = :module
-              AND cm.module = m.id
-              AND cm.instance = t.id";
+
     $results = $DB->get_records_sql($sql, $params);
 
     foreach ($results as $cmid => $htmlobject) {
