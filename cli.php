@@ -153,38 +153,38 @@ switch ($table) {
         $sql = "SELECT t.id, t.title as name, t.$field as text
                 FROM $from t
                 WHERE $likewhere";
-        $nolink = true;
         break;
     case 'course':
         $sql = "SELECT t.id, t.shortname as name, t.$field as text
                 FROM $from t
                 WHERE $likewhere";
-        $nolink = true;
         break;
     case 'question';
         $sql = "SELECT t.id, t.name, t.$field as text
                 FROM $from t
                 WHERE $likewhere";
-        $nolink = true;
         break;
     case 'wiki_pages':
         $sql = "SELECT t.id, t.title as name, t.$field as text
                 FROM $from t
                 WHERE $likewhere";
-        $nolink = true;
         break;
     default:
-        $sql = "SELECT cm.id as cmid, t.id, $name, t.$field as text
-                FROM $from t, {modules} m, {course_modules} cm
-                WHERE $likewhere
-                  AND m.name = :module
-                  AND cm.module = m.id
-                  AND cm.instance = t.id";
+        $sql = "SELECT t.id, t.name, t.$field as text
+                FROM $from t
+                WHERE $likewhere";
+        // $sql = "SELECT cm.id as cmid, t.id, t.name, t.$field as text
+        //         FROM $from t, {modules} m, {course_modules} cm
+        //         WHERE $likewhere
+        //           AND m.name = :module
+        //           AND cm.module = m.id
+        //           AND cm.instance = t.id";
 }
 
 $results = $DB->get_records_sql($sql, $params);
 if(!results) {
     echo "Error running...\n$sql\n";
+    die;
 }
 
 // Capture results in this...
