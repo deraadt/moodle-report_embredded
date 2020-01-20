@@ -148,12 +148,40 @@ $matchtypes = ['image'=>'src', 'file'=>'href'];
 $from = '{' . $table . '}';
 $params = ['match' => '%'.$matchtext.'%', 'module' => $table];
 $likewhere = $DB->sql_like('t.'.$field, ':match', false);
-$sql = "SELECT cm.id as cmid, t.id, t.name, t.$field as text
-        FROM $from t, {modules} m, {course_modules} cm
-        WHERE $likewhere
-          AND m.name = :module
-          AND cm.module = m.id
-          AND cm.instance = t.id";
+switch ($table) {
+    case 'book_chapters':
+        $sql = "SELECT t.id, t.title as name, t.$field as text
+                FROM $from t
+                WHERE $likewhere";
+        $nolink = true;
+        break;
+    case 'course':
+        $sql = "SELECT t.id, t.shortname as name, t.$field as text
+                FROM $from t
+                WHERE $likewhere";
+        $nolink = true;
+        break;
+    case 'question';
+        $sql = "SELECT t.id, t.name, t.$field as text
+                FROM $from t
+                WHERE $likewhere";
+        $nolink = true;
+        break;
+    case 'wiki_pages':
+        $sql = "SELECT t.id, t.title as name, t.$field as text
+                FROM $from t
+                WHERE $likewhere";
+        $nolink = true;
+        break;
+    default:
+        $sql = "SELECT cm.id as cmid, t.id, $name, t.$field as text
+                FROM $from t, {modules} m, {course_modules} cm
+                WHERE $likewhere
+                  AND m.name = :module
+                  AND cm.module = m.id
+                  AND cm.instance = t.id";
+}
+
 $results = $DB->get_records_sql($sql, $params);
 
 // Capture results in this...
